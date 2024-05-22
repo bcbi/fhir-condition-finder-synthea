@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Finder</title>
+</head>
+<body>
+    <div class=container>
+    <h1>Patient Finder</h1>
+    <form method="post">
+        <label for="number">Enter a patient ID:</label>
+        <input type="text" name="number" id="number">
+        <input type="submit" value="Search">
+    </form>
+    {% if result is not none %}
+    <h3>Result: </h3>
+    <p>First Name: {{ result.name[0].given[0] }}</p>
+    <p>Last Name: {{ result.name[0].family }}</p>
+    <p>Gender: {{ result.gender }}</p>
+    <p>Birth Date: {{ result.birthDate}}</p>
+    <p>State: {{ result.address[0].state}}</p>
+    {% endif %}
+    </div>
+</body>
+</html>
+
+
+<style>
+    .container {
+        display: grid;
+        place-items: center;
+    }
+</style>
+
+
