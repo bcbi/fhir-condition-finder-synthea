@@ -1,4 +1,4 @@
-# fhir-patient-finder
+# fhir-condition-finder
 
 This is a FHIR web application written in Python and using Flask as the backend. It can only be used for synthea datasets.
 
