@@ -4,10 +4,11 @@ This is a FHIR web application written in Python and using Flask as the backend.
 
 Following are the server port number and their respective datasets
 
+```
 9090 -> synthea10 (demo dataset)
 9091 -> synthea_ri_adult
 9092 -> synthea_ri_peds
-
+```
 
 ## 1. Dependencies
 This app depends on Python 3 and a few Python packages outlined in the `requirements.txt` file. 
@@ -15,9 +16,12 @@ This app depends on Python 3 and a few Python packages outlined in the `requirem
 ## 2. Before running the app
 
 Change these parameters in the .env file
+
+```
 FHIR_USERNAME = ???
 FHIR_PASSWORD = ???
 FHIR_PORT=5000
+```
 
 and change the port number according to the dataset in the app.py file 
 FHIR_SERVER_BASE_URL= "http://pwebmedcit.services.brown.edu:????/fhir"
