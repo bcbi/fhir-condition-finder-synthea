@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 app = Flask(__name__)
 
-FHIR_SERVER_BASE_URL="http://pwebmedcit.services.brown.edu:9090/fhir"
+FHIR_SERVER_BASE_URL="http://pwebmedcit.services.brown.edu:9091/fhir"
 
 load_dotenv()
 
