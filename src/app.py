@@ -1,8 +1,7 @@
 import requests
 import os
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 from dotenv import load_dotenv
-
 
 app = Flask(__name__)
 
@@ -13,53 +12,66 @@ load_dotenv()
 username = os.getenv("FHIR_USERNAME")
 password = os.getenv("FHIR_PASSWORD")
 
+patients_data = []
 
 def request_patient(patient_id, credentials):
-
-    req = requests.get(FHIR_SERVER_BASE_URL + "/Patient/" + str(patient_id), auth = credentials)
-
-    print(f"Requests status: {req.status_code}")
-
-    response = req.json()
-    print(response.keys())
-
-    return response
-
-def search_patients_by_condition(condition_id, credentials):
-    # Search for patients with a specific condition
-    search_url = f"{FHIR_SERVER_BASE_URL}/Condition?code={condition_id}"
-    req = requests.get(search_url, auth=credentials)
-
+    req = requests.get(FHIR_SERVER_BASE_URL + "/Patient/" + str(patient_id), auth=credentials)
     if req.status_code == 200:
-        conditions = req.json()['entry']
-        patient_ids = [entry['resource']['subject']['reference'].split('/')[-1] for entry in conditions]
-        patients = [request_patient(patient_id, credentials) for patient_id in patient_ids]
-         # Convert patient details into set of tuples to ensure uniqueness
-        unique_patients = set((patient['id'], patient['name'][0]['given'][0], patient['name'][0]['family'], patient['gender'], patient['birthDate']) for patient in patients)
-
-        total_patients = len(unique_patients)
-        return {'unique_patients': unique_patients, 'total_patients': total_patients}
+        return req.json()
     else:
+        print(f"Request failed for patient {patient_id} with status code: {req.status_code}")
         return None
 
+def search_patients_by_condition(condition_id, credentials):
+    search_url = f"{FHIR_SERVER_BASE_URL}/Condition?code={condition_id}"
+    patients = []
 
+    while search_url:
+        req = requests.get(search_url, auth=credentials)
+        if req.status_code == 200:
+            response = req.json()
+            conditions = response.get('entry', [])
+            patient_ids = [entry['resource']['subject']['reference'].split('/')[-1] for entry in conditions]
+            
+            for patient_id in patient_ids:
+                patient = request_patient(patient_id, credentials)
+                if patient:
+                    patients.append(patient)
 
+            search_url = None
+            if 'link' in response:
+                for link in response['link']:
+                    if link['relation'] == 'next':
+                        search_url = link['url']
+                        break
+        else:
+            return []
 
+    unique_patients = list(set(
+        (patient['id'], patient['name'][0]['given'][0], patient['name'][0]['family'], patient['gender'], patient['birthDate'])
+        for patient in patients
+    ))
+    return unique_patients
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    result = None
-    credentials = (username, password)
+    global patients_data
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
 
     if request.method == 'POST':
-        try:
-            condition_id = request.form['condition_id']
-            result = search_patients_by_condition(condition_id, credentials)
-        except ValueError:
-            result = 'Invalid input. Please enter a valid condition ID.'
+        condition_id = request.form['condition_id']
+        credentials = (username, password)
+        patients_data = search_patients_by_condition(condition_id, credentials)
+        page = 1
+        return redirect(url_for('index', page=page))
 
-    return render_template('index.html', result=result)
+    total_pages = (len(patients_data) - 1) // per_page + 1 if patients_data else 1
+    start = (page - 1) * per_page
+    end = start + per_page
+    patients_to_show = patients_data[start:end] if patients_data else []
 
+    return render_template('index.html', patients=patients_to_show, page=page, total_pages=total_pages, total_patients=len(patients_data))
 
 if __name__ == '__main__':
     port_str = os.environ['FHIR_PORT']

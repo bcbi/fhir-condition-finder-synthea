@@ -2,6 +2,8 @@
 
 This is a FHIR web application written in Python and using Flask as the backend. It can only be used for synthea datasets.
 
+This app takes the condition id as input and displays the total number of patients with that medication and each patient info from the database.
+
 Following are the server port number and their respective datasets
 
 ```
@@ -48,4 +50,11 @@ python3 src/app.py
 
 This will start the app on port 5000. You can open your preferred browser and see the app running on `http://localhost:5000`
 
+## 3. Testing the App
+
+Following condition source values can we used as inputs to the app
+
+```
+80583007
+```
 

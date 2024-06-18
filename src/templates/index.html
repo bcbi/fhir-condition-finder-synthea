@@ -1,45 +1,72 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Patient Finder for a given condition_id</title>
+    <script>
+        function clearPreviousResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+    </script>
 </head>
 <body>
-    <div class=container>
-    <h1>Patient Finder for a given condition_id</h1>
+    <div class="container">
+        <h1>Patient Finder for a given condition_id</h1>
 
-    <form method="post">
-        <label for="condition_id">Enter a condition ID:</label>
-        <input type="text" name="condition_id" id="condition_id">
-        <input type="submit" value="Search">
-    </form>
+        <form method="post" onsubmit="clearPreviousResults()">
+            <label for="condition_id">Enter a condition ID:</label>
+            <input type="text" name="condition_id" id="condition_id">
+            <input type="submit" value="Search">
+        </form>
    
-    {% if result %}
-    <h3>Total Patients: {{ result['total_patients'] }}</h3>
-    <h3>Results:</h3>
-    <ul>
-        {% for patient in result['unique_patients'] %}
-            <li>
-                <p>Patient ID: {{ patient[0] }}</p>
-                <p>First Name: {{ patient[1] }}</p>
-                <p>Last Name: {{ patient[2] }}</p>
-                <p>Gender: {{ patient[3] }}</p>
-                <p>Birth Date: {{ patient[4] }}</p>
-            </li>
-        {% endfor %}
-    </ul>
-{% endif %}
+        <div id="results">
+            {% if total_patients is not none %}
+                <h3>Total Patients: {{ total_patients }}</h3>
+            {% endif %}
 
-
+            {% if patients %}
+                <h3>Results:</h3>
+                <ul>
+                    {% for patient in patients %}
+                    <li>
+                        <p>Patient ID: {{ patient[0] }}</p>
+                        <p>First Name: {{ patient[1] }}</p>
+                        <p>Last Name: {{ patient[2] }}</p>
+                        <p>Gender: {{ patient[3] }}</p>
+                        <p>Birth Date: {{ patient[4] }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="pagination">
+                    {% if page > 1 %}
+                    <a href="{{ url_for('index', page=page-1) }}">Previous</a>
+                    {% endif %}
+                    {% if page < total_pages %}
+                    <a href="{{ url_for('index', page=page+1) }}">Next</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
     </div>
 </body>
 </html>
-
-
 <style>
-    .container {
-        display: grid;
-        place-items: center;
-    }
+.container {
+    display: grid;
+    place-items: center;
+}
+.pagination {
+    margin-top: 20px;
+}
+.pagination a {
+    margin: 0 10px;
+    text-decoration: none;
+    padding: 5px 10px;
+    background: #007BFF;
+    color: white;
+    border-radius: 5px;
+}
+.pagination a:hover {
+    background: #0056b3;
+}
 </style>
